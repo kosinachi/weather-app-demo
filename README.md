@@ -1,26 +1,27 @@
-# Weather App - Deploying .NET 8 API to Azure Kubernetes Service (AKS)
+# 🌤️ Weather App - Azure Kubernetes Service (AKS) Deployment
 
-This project shows how to build, containerize, and deploy a simple **.NET 8 Web API** to **Azure Kubernetes Service (AKS)** using **Docker, Azure Container Registry (ACR), and GitHub Actions CI/CD**.
-
----
-
-## 📖 Overview
-- **.NET 8 Web API** with RESTful endpoints and Swagger
-- **Dockerized** application for consistency
-- **Azure Container Registry (ACR)** to store container images
-- **Azure Kubernetes Service (AKS)** for scaling and self-healing
-- **GitHub Actions** for automated CI/CD pipeline
+This project demonstrates how to build, containerize, and deploy a simple **.NET 8 Web API** to **Azure Kubernetes Service (AKS)** with **GitHub Actions CI/CD**.
 
 ---
 
-## 🛠️ Prerequisites
-Make sure you have:
+## What you will Learn
+- Build a production-ready **.NET Web API**
+- Package your app into a **Docker container**
+- Store images in **Azure Container Registry (ACR)**
+- Deploy and scale your app on **Azure Kubernetes Service (AKS)**
+- Automate deployments with **GitHub Actions**
+
+---
+
+## Prerequisites
+Before starting, make sure you have:
 - [Visual Studio Code](https://code.visualstudio.com/)
-- [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download)
-- [Docker Desktop](https://www.docker.com/products/docker-desktop)
+- [.NET 8 SDK](https://dotnet.microsoft.com/download)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 - [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/)
-- [GitHub account](https://github.com)
+- [Git](https://git-scm.com/)
+- [GitHub account](https://github.com/)
 - [Azure account](https://azure.microsoft.com/free/)
 
 ---
@@ -42,58 +43,29 @@ WeatherApp/
 └── .github/workflows/deploy.yml  # GitHub Actions workflow
 ```
 
-## 🚀 Step-by-Step Deployment
+## Step-by-Step Guide
 
-### 1. Run Locally
+### 1 Build and Test Locally
+```bash
+dotnet build
+dotnet run
 
-`dotnet build`
-`dotnet run`
+2 Containerize with Docker
+docker build -t weather-app:local .
+docker run -p 8080:8080 weather-app:local
 
-2. Build Docker Image
+3 Push Image to Azure Container Registry
+az login
+az acr create --resource-group student-demo --name <your-acr-name> --sku Basic
+az acr build --registry <your-acr-name> --image weather-app:latest .
 
-`docker build -t weather-app:local .`
-`docker run -p 8080:8080 weather-app:local`
+4 Deploy to AKS
+az aks create --resource-group student-demo --name student-aks-cluster --node-count 1 --attach-acr <your-acr-name>
+az aks get-credentials --resource-group student-demo --name student-aks-cluster
+kubectl apply -f k8s/
 
-3. Push Image to ACR
-
-`az login`
-`az acr create --resource-group student-demo --name <your-acr-name> --sku Basic`
-`az acr build --registry <your-acr-name> --image weather-app:latest .`
-
-4. Deploy to AKS
-
-`az aks create --resource-group student-demo --name student-aks-cluster --node-count 1 --attach-acr <your-acr-name>`
-`az aks get-credentials --resource-group student-demo --name student-aks-cluster`
-`kubectl apply -f k8s/`
-
-5. Access the App
-
-`kubectl get service weather-app-service --watch`
-
-Copy the EXTERNAL-IP and test in your browser:
-
-`/` → Welcome message
-
-`/weather` → Weather data
-
-`/health` → Health endpoint
-
-`/swagger` → API documentation
-
-CI/CD with GitHub Actions
-Workflow triggers on push to main branch
-
-Steps:
-
-Build and test .NET app
-
-Build Docker image
-
-Push image to ACR
-
-Deploy to AKS
-
-GitHub secrets required:
+5 Automate with GitHub Actions
+Add GitHub secrets:
 
 AZURE_CREDENTIALS
 
@@ -103,24 +75,58 @@ RESOURCE_GROUP
 
 CLUSTER_NAME
 
-🧹 Clean Up
-To avoid charges, delete all resources:
+Workflow will:
 
-`az group delete --name student-demo --yes --no-wait`
+Build and push Docker image
+
+Deploy new version to AKS automatically
+
+6 Access the App
+kubectl get service weather-app-service --watch
+
+Copy the EXTERNAL-IP
+
+Open in browser:
+
+http://EXTERNAL-IP/
+
+http://EXTERNAL-IP/weather
+
+http://EXTERNAL-IP/health
+
+http://EXTERNAL-IP/swagger
+
+🔧 Troubleshooting
+ImagePullBackOff → Check ACR integration with AKS
+
+Service not accessible → Wait for LoadBalancer IP (2-5 min)
+
+GitHub Actions failing → Verify GitHub secrets are correct
+
+🧹 Clean Up
+Delete all resources to avoid charges:
+
+az group delete --name student-demo --yes --no-wait
 
 What You Achieved
+✅ Built and containerized a .NET Web API
 
-Built a .NET 8 Web API
+✅ Pushed Docker image to Azure Container Registry
 
-Containerized with Docker
+✅ Deployed and scaled app on Azure Kubernetes Service
 
-Deployed to AKS with ACR
-
-Automated deployments with GitHub Actions
+✅ Automated CI/CD pipeline with GitHub Actions
 
 📚 Next Steps
-Add a database (Azure SQL or PostgreSQL)
+Add a database (Azure SQL / PostgreSQL)
 
+Use ConfigMaps and Secrets in Kubernetes
+
+Set up Application Insights for monitoring
+
+Explore Terraform / Bicep for Infrastructure as Code
+
+This project is perfect for beginners learning cloud-native development with Azure, Kubernetes, and GitHub Actions.
 Use ConfigMaps and Secrets in Kubernetes
 
 Add monitoring with Azure Application Insights
